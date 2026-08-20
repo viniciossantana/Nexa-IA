@@ -7,6 +7,22 @@ const OpenAI = require("openai");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+console.log("=================================");
+console.log("INICIANDO NEXA SERVER");
+console.log("=================================");
+
+console.log(
+    "API KEY encontrada:",
+    process.env.OPENAI_API_KEY ? "SIM" : "NÃO"
+);
+
+console.log(
+    "API KEY começa com:",
+    process.env.OPENAI_API_KEY
+        ? process.env.OPENAI_API_KEY.substring(0, 7) + "..."
+        : "N/A"
+);
+
 const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY
 });
@@ -15,130 +31,228 @@ const PROMPT_IA = `
 Você é a NEXA, uma inteligência artificial criada pela Nexa Agency Enterprises.
 
 Sua personalidade:
+
 - Inteligente, amigável e profissional.
-- Responda em português do Brasil, salvo quando o usuário pedir outro idioma.
+- Responda em português do Brasil.
 - Seja clara, objetiva e natural.
 - Não diga que é uma pessoa.
 - Não invente informações.
 - Quando não souber algo, seja honesta.
-- Evite respostas excessivamente longas quando uma resposta curta resolver.
 - Ajude o usuário com programação, tecnologia, criação, estudos, ideias e assuntos gerais.
 - Mantenha uma personalidade própria e consistente.
 `;
 
-// ==============================
-// MIDDLEWARES
-// ==============================
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// ==============================
-// ARQUIVOS DO FRONTEND
-// ==============================
-
 app.use(express.static(path.join(__dirname, "public")));
 
-// ==============================
-// ROTA PRINCIPAL DA IA
-// ==============================
 
-app.post("/api/chat", async (req, res) => {
+// =====================================
+// TESTE DIRETO DA OPENAI
+// =====================================
+
+app.get("/api/test-openai", async (req, res) => {
+
     try {
-        const mensagem = req.body?.mensagem;
 
-        console.log("Mensagem recebida:", mensagem);
-
-        if (!mensagem || typeof mensagem !== "string") {
-            return res.status(400).json({
-                erro: "Mensagem inválida."
-            });
-        }
-
-        if (!process.env.OPENAI_API_KEY) {
-            console.error("OPENAI_API_KEY não encontrada.");
-
-            return res.status(500).json({
-                erro: "A chave da OpenAI não está configurada no servidor."
-            });
-        }
+        console.log("TESTANDO OPENAI...");
 
         const resposta = await openai.responses.create({
-            model: "gpt-5.4-mini",
-            instructions: PROMPT_IA,
-            input: mensagem
+            model: "gpt-5.6-luna",
+            input: "Responda apenas: conexão funcionando."
         });
 
-        const texto = resposta.output_text;
+        console.log("OPENAI FUNCIONOU!");
 
-        console.log("Resposta da NEXA:", texto);
-
-        return res.status(200).json({
-            resposta: texto
+        return res.json({
+            sucesso: true,
+            resposta: resposta.output_text
         });
 
     } catch (erro) {
-        console.error("ERRO NA API:", erro);
+
+        console.error("=================================");
+        console.error("ERRO DIRETO DA OPENAI");
+        console.error("=================================");
+
+        console.error("Mensagem:", erro.message);
+        console.error("Status:", erro.status);
+        console.error("Código:", erro.code);
+        console.error("Tipo:", erro.type);
+
+        if (erro.error) {
+            console.error("Erro API:", erro.error);
+        }
+
+        console.error("=================================");
 
         return res.status(500).json({
-            erro: "Não foi possível obter uma resposta da NEXA.",
-            detalhes: erro.message
+            sucesso: false,
+            mensagem: erro.message,
+            status: erro.status || null,
+            codigo: erro.code || null,
+            tipo: erro.type || null
         });
+
     }
+
 });
 
-// ==============================
-// ROTA DE TESTE
-// ==============================
+
+// =====================================
+// CHAT
+// =====================================
+
+app.post("/api/chat", async (req, res) => {
+
+    try {
+
+        const mensagem = req.body?.mensagem;
+
+        console.log("");
+        console.log("=================================");
+        console.log("NOVA MENSAGEM");
+        console.log("=================================");
+        console.log("Mensagem:", mensagem);
+
+        if (!mensagem || typeof mensagem !== "string") {
+
+            return res.status(400).json({
+                erro: "Mensagem inválida."
+            });
+
+        }
+
+        if (!process.env.OPENAI_API_KEY) {
+
+            console.error("API KEY NÃO ENCONTRADA.");
+
+            return res.status(500).json({
+                erro: "OPENAI_API_KEY não encontrada."
+            });
+
+        }
+
+        console.log("Enviando para OpenAI...");
+
+        const resposta = await openai.responses.create({
+
+            model: "gpt-5.6-luna",
+
+            instructions: PROMPT_IA,
+
+            input: mensagem
+
+        });
+
+        console.log("OpenAI respondeu!");
+
+        console.log(
+            "Resposta:",
+            resposta.output_text
+        );
+
+        return res.status(200).json({
+
+            resposta: resposta.output_text
+
+        });
+
+    } catch (erro) {
+
+        console.error("");
+        console.error("=================================");
+        console.error("ERRO DA OPENAI");
+        console.error("=================================");
+
+        console.error("Mensagem:", erro.message);
+        console.error("Status:", erro.status);
+        console.error("Código:", erro.code);
+        console.error("Tipo:", erro.type);
+
+        console.error("Objeto completo:");
+
+        console.error(erro);
+
+        console.error("=================================");
+        console.error("");
+
+        return res.status(500).json({
+
+            erro: erro.message || "Erro desconhecido.",
+
+            status: erro.status || null,
+
+            codigo: erro.code || null,
+
+            tipo: erro.type || null
+
+        });
+
+    }
+
+});
+
+
+// =====================================
+// TESTE DO SERVIDOR
+// =====================================
 
 app.get("/api/test", (req, res) => {
+
     res.json({
+
         status: "online",
-        mensagem: "Servidor da NEXA funcionando corretamente."
+
+        mensagem: "Servidor da NEXA funcionando."
+
     });
+
 });
 
-// ==============================
-// TRATAMENTO DE ROTAS NÃO ENCONTRADAS
-// ==============================
+
+// =====================================
+// ROTAS
+// =====================================
 
 app.use((req, res) => {
+
     if (req.path.startsWith("/api/")) {
+
         return res.status(404).json({
+
             erro: "Rota da API não encontrada."
+
         });
+
     }
 
-    res.sendFile(path.join(__dirname, "public", "index.html"));
+    res.sendFile(
+        path.join(
+            __dirname,
+            "public",
+            "index.html"
+        )
+    );
+
 });
 
-// ==============================
-// TRATAMENTO GLOBAL DE ERROS
-// ==============================
 
-app.use((erro, req, res, next) => {
-    console.error("ERRO GLOBAL:", erro);
-
-    if (res.headersSent) {
-        return next(erro);
-    }
-
-    res.status(500).json({
-        erro: "Erro interno do servidor.",
-        detalhes: erro.message
-    });
-});
-
-// ==============================
-// INICIAR SERVIDOR
-// ==============================
+// =====================================
+// SERVIDOR
+// =====================================
 
 app.listen(PORT, () => {
+
+    console.log("");
     console.log("=================================");
     console.log("      NEXA SERVER ONLINE");
     console.log("=================================");
     console.log(`Servidor: http://localhost:${PORT}`);
-    console.log(`API:      http://localhost:${PORT}/api/chat`);
-    console.log(`Teste:    http://localhost:${PORT}/api/test`);
+    console.log(`Teste: http://localhost:${PORT}/api/test`);
+    console.log(`Teste OpenAI: http://localhost:${PORT}/api/test-openai`);
     console.log("=================================");
+    console.log("");
+
 });
