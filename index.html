@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0a0a0f">
+
     <title>Nexa Marketing AI</title>
 
     <style>
@@ -12,132 +14,349 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --bg: #08080c;
+            --bg-secondary: #101017;
+            --card: #15151e;
+            --card-hover: #1b1b26;
+            --border: #292936;
+            --primary: #8b5cf6;
+            --primary-hover: #7c3aed;
+            --text: #ffffff;
+            --muted: #9898a8;
+            --user-message: #6d3bd8;
+        }
+
         body {
             min-height: 100vh;
-            background: #0b0b10;
-            color: #fff;
-            font-family: Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            font-family: Inter, Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
+            padding: 24px;
         }
 
         .chat {
             width: 100%;
-            max-width: 800px;
-            height: 700px;
-            background: #12121a;
-            border: 1px solid #252535;
-            border-radius: 20px;
+            max-width: 900px;
+            height: min(800px, calc(100vh - 48px));
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 24px;
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+            box-shadow: 0 25px 80px rgba(0, 0, 0, 0.45);
         }
 
         .cabecalho {
-            padding: 22px 25px;
-            border-bottom: 1px solid #252535;
-            background: #15151f;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--border);
+            background: rgba(21, 21, 30, 0.95);
+        }
+
+        .logo {
+            width: 44px;
+            height: 44px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 21px;
+            flex-shrink: 0;
+        }
+
+        .cabecalho-texto {
+            min-width: 0;
         }
 
         .cabecalho h1 {
-            font-size: 20px;
+            font-size: 17px;
+            font-weight: 700;
+            line-height: 1.2;
         }
 
         .cabecalho p {
             margin-top: 5px;
-            color: #9999aa;
-            font-size: 13px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .status {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            color: #a7a7b5;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .status-ponto {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #22c55e;
+            box-shadow: 0 0 10px rgba(34, 197, 94, 0.7);
         }
 
         .mensagens {
             flex: 1;
             overflow-y: auto;
-            padding: 25px;
+            padding: 28px;
             display: flex;
             flex-direction: column;
             gap: 18px;
+            scroll-behavior: smooth;
+        }
+
+        .mensagens::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .mensagens::-webkit-scrollbar-thumb {
+            background: #30303d;
+            border-radius: 10px;
         }
 
         .mensagem {
-            max-width: 80%;
+            max-width: min(75%, 650px);
             padding: 14px 17px;
-            border-radius: 15px;
-            line-height: 1.5;
+            border-radius: 18px;
+            line-height: 1.6;
+            font-size: 14px;
             white-space: pre-wrap;
+            overflow-wrap: anywhere;
+            animation: aparecer 0.2s ease;
+        }
+
+        @keyframes aparecer {
+            from {
+                opacity: 0;
+                transform: translateY(5px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .ia {
             align-self: flex-start;
-            background: #1c1c28;
-            border: 1px solid #29293a;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-bottom-left-radius: 6px;
         }
 
         .usuario {
             align-self: flex-end;
-            background: #7c3aed;
+            background: var(--user-message);
+            border-bottom-right-radius: 6px;
         }
 
-        .digitando {
-            color: #9999aa;
-            font-size: 13px;
+        .erro {
+            background: rgba(127, 29, 29, 0.25);
+            border-color: rgba(248, 113, 113, 0.3);
+            color: #fecaca;
+        }
+
+        .entrada-area {
+            padding: 16px 20px 20px;
+            border-top: 1px solid var(--border);
+            background: var(--bg-secondary);
         }
 
         .entrada {
-            padding: 18px;
-            border-top: 1px solid #252535;
             display: flex;
+            align-items: center;
             gap: 10px;
+            padding: 6px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            transition: border-color 0.2s;
+        }
+
+        .entrada:focus-within {
+            border-color: rgba(139, 92, 246, 0.7);
         }
 
         .entrada input {
             flex: 1;
-            background: #1c1c27;
-            color: #fff;
-            border: 1px solid #303044;
-            border-radius: 12px;
-            padding: 14px;
+            min-width: 0;
+            background: transparent;
+            color: var(--text);
+            border: none;
             outline: none;
-            font-size: 15px;
+            padding: 12px;
+            font-size: 14px;
         }
 
-        .entrada input:focus {
-            border-color: #7c3aed;
+        .entrada input::placeholder {
+            color: #6f6f7e;
         }
 
         .entrada button {
+            width: 44px;
+            height: 44px;
             border: none;
-            background: #7c3aed;
-            color: white;
-            padding: 0 22px;
             border-radius: 12px;
+            background: var(--primary);
+            color: white;
             cursor: pointer;
-            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: 0.2s;
+            flex-shrink: 0;
         }
 
         .entrada button:hover {
-            background: #6d28d9;
+            background: var(--primary-hover);
+            transform: translateY(-1px);
         }
 
         .entrada button:disabled {
-            opacity: 0.5;
+            opacity: 0.45;
             cursor: not-allowed;
+            transform: none;
         }
 
-        @media (max-width: 600px) {
+        .rodape {
+            text-align: center;
+            margin-top: 9px;
+            color: #5f5f6d;
+            font-size: 10px;
+        }
+
+        .digitando {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--muted);
+        }
+
+        .digitando span {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: #8b8b9b;
+            animation: pulsar 1.2s infinite;
+        }
+
+        .digitando span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .digitando span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+        @keyframes pulsar {
+            0%, 60%, 100% {
+                opacity: 0.3;
+                transform: translateY(0);
+            }
+
+            30% {
+                opacity: 1;
+                transform: translateY(-3px);
+            }
+        }
+
+        @media (max-width: 700px) {
             body {
                 padding: 0;
             }
 
             .chat {
-                height: 100vh;
+                width: 100%;
+                height: 100dvh;
+                max-width: none;
+                border: none;
                 border-radius: 0;
             }
 
+            .cabecalho {
+                padding: 16px;
+            }
+
+            .logo {
+                width: 40px;
+                height: 40px;
+                border-radius: 12px;
+            }
+
+            .cabecalho h1 {
+                font-size: 15px;
+            }
+
+            .cabecalho p {
+                font-size: 11px;
+            }
+
+            .status {
+                font-size: 0;
+            }
+
+            .status-ponto {
+                width: 8px;
+                height: 8px;
+            }
+
+            .mensagens {
+                padding: 18px 14px;
+                gap: 14px;
+            }
+
             .mensagem {
-                max-width: 90%;
+                max-width: 88%;
+                font-size: 14px;
+                padding: 12px 14px;
+            }
+
+            .entrada-area {
+                padding: 10px 10px calc(10px + env(safe-area-inset-bottom));
+            }
+
+            .entrada {
+                border-radius: 14px;
+            }
+
+            .entrada input {
+                padding: 11px 9px;
+                font-size: 16px;
+            }
+
+            .entrada button {
+                width: 42px;
+                height: 42px;
+            }
+
+            .rodape {
+                display: none;
+            }
+        }
+
+        @media (max-width: 380px) {
+            .cabecalho {
+                padding: 13px;
+            }
+
+            .mensagens {
+                padding: 14px 10px;
+            }
+
+            .mensagem {
+                max-width: 92%;
             }
         }
     </style>
@@ -148,33 +367,59 @@
     <main class="chat">
 
         <header class="cabecalho">
-            <h1>🤖 Nexa Marketing AI</h1>
-            <p>Especialista em Marketing Digital</p>
+
+            <div class="logo">
+                ✦
+            </div>
+
+            <div class="cabecalho-texto">
+                <h1>Nexa Marketing AI</h1>
+                <p>Especialista em Marketing Digital</p>
+            </div>
+
+            <div class="status">
+                <span class="status-ponto"></span>
+                Online
+            </div>
+
         </header>
 
         <section class="mensagens" id="mensagens">
+
             <div class="mensagem ia">
-                Olá! Eu sou a Nexa Marketing AI.
+Olá! Eu sou a Nexa Marketing AI. 👋
 
-                Posso ajudar com estratégia, branding, conteúdo, posicionamento, campanhas e marketing digital.
+Sou especializada em marketing digital, branding, posicionamento, conteúdo, campanhas e estratégia.
 
-                Como posso ajudar?
+Como posso ajudar você hoje?
             </div>
+
         </section>
 
-        <form class="entrada" id="formulario">
-            <input
-                type="text"
-                id="mensagem"
-                placeholder="Digite sua mensagem..."
-                autocomplete="off"
-                required
-            >
+        <div class="entrada-area">
 
-            <button type="submit" id="enviar">
-                Enviar
-            </button>
-        </form>
+            <form class="entrada" id="formulario">
+
+                <input
+                    type="text"
+                    id="mensagem"
+                    placeholder="Digite sua mensagem..."
+                    autocomplete="off"
+                    maxlength="4000"
+                    required
+                >
+
+                <button type="submit" id="enviar" aria-label="Enviar mensagem">
+                    ↑
+                </button>
+
+            </form>
+
+            <div class="rodape">
+                Nexa Marketing AI • Protótipo
+            </div>
+
+        </div>
 
     </main>
 
@@ -184,10 +429,15 @@
         const mensagens = document.getElementById("mensagens");
         const botaoEnviar = document.getElementById("enviar");
 
-        function adicionarMensagem(texto, tipo) {
+        function adicionarMensagem(texto, tipo, erro = false) {
             const elemento = document.createElement("div");
 
             elemento.className = `mensagem ${tipo}`;
+
+            if (erro) {
+                elemento.classList.add("erro");
+            }
+
             elemento.textContent = texto;
 
             mensagens.appendChild(elemento);
@@ -196,7 +446,26 @@
             return elemento;
         }
 
+        function adicionarDigitando() {
+            const elemento = document.createElement("div");
+
+            elemento.className = "mensagem ia digitando";
+            elemento.id = "digitando";
+
+            elemento.innerHTML = `
+                <span></span>
+                <span></span>
+                <span></span>
+            `;
+
+            mensagens.appendChild(elemento);
+            mensagens.scrollTop = mensagens.scrollHeight;
+
+            return elemento;
+        }
+
         formulario.addEventListener("submit", async (evento) => {
+
             evento.preventDefault();
 
             const texto = campoMensagem.value.trim();
@@ -210,14 +479,11 @@
             campoMensagem.value = "";
             campoMensagem.disabled = true;
             botaoEnviar.disabled = true;
-            botaoEnviar.textContent = "...";
 
-            const carregando = adicionarMensagem(
-                "Pensando...",
-                "ia"
-            );
+            const digitando = adicionarDigitando();
 
             try {
+
                 const resposta = await fetch("/api/chat", {
                     method: "POST",
                     headers: {
@@ -230,31 +496,42 @@
 
                 const dados = await resposta.json();
 
-                carregando.remove();
+                digitando.remove();
 
                 if (!resposta.ok) {
-                    throw new Error(dados.erro || "Erro ao conversar com a IA.");
+                    throw new Error(
+                        dados.erro || "Erro desconhecido no servidor."
+                    );
                 }
 
-                adicionarMensagem(dados.resposta, "ia");
-
-            } catch (erro) {
-                carregando.remove();
-
                 adicionarMensagem(
-                    "Desculpe, ocorreu um erro ao processar sua mensagem.",
+                    dados.resposta,
                     "ia"
                 );
 
-                console.error(erro);
+            } catch (erro) {
+
+                digitando.remove();
+
+                console.error("Erro:", erro);
+
+                adicionarMensagem(
+                    `Erro: ${erro.message}`,
+                    "ia",
+                    true
+                );
 
             } finally {
+
                 campoMensagem.disabled = false;
                 botaoEnviar.disabled = false;
-                botaoEnviar.textContent = "Enviar";
                 campoMensagem.focus();
+
             }
+
         });
+
+        campoMensagem.focus();
     </script>
 
 </body>
