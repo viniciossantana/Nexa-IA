@@ -79,7 +79,7 @@ app.post("/api/chat", async (req, res) => {
         console.log("Mensagem recebida:", mensagem);
 
         const resposta = await openai.responses.create({
-            model: "gpt-5.6-luna",
+            model: "gpt-5.4-mini",
             instructions: PROMPT_IA,
             input: mensagem
         });
